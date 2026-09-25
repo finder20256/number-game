@@ -1,8 +1,6 @@
 const TOTAL = 20;
 
 const board = document.getElementById("board");
-const hint = document.getElementById("hint");
-const status = document.getElementById("status");
 
 let found = 0;
 let resetting = false;
@@ -44,19 +42,12 @@ function onTileClick(button) {
 
   if (found === TOTAL) {
     finish();
-    return;
   }
-
-  if (hint) hint.textContent = "Tap another blank button.";
-  status.textContent = `${found} of ${TOTAL} found`;
 }
 
 function finish() {
   resetting = true;
   board.classList.add("complete");
-  if (hint) hint.textContent = "well done";
-  status.textContent = "All done!";
-  status.classList.add("done");
   playSuccess();
 
   window.setTimeout(resetBoard, 1900);
@@ -71,10 +62,7 @@ function resetBoard() {
   });
 
   board.classList.remove("complete");
-  status.classList.remove("done");
   found = 0;
-  if (hint) hint.textContent = "Tap a button. The next number will peek out.";
-  status.textContent = `0 of ${TOTAL} found`;
   resetting = false;
 }
 

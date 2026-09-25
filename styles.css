@@ -66,28 +66,9 @@ body {
 
 .app {
   position: relative;
-  width: min(860px, calc(100% - 32px));
+  width: min(920px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 28px 0 36px;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 18px;
-}
-
-h1 {
-  margin: 0;
-  font-size: clamp(2rem, 5vw, 2.6rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-}
-
-.hint,
-.status {
-  margin: 8px 0 0;
-  color: var(--ink-soft);
-  font-size: 1.05rem;
+  padding: 24px 0;
 }
 
 .board {
@@ -103,7 +84,7 @@ h1 {
   background: var(--tile);
   color: transparent;
   font-family: "Comic Sans MS", "Segoe Print", "Segoe UI", sans-serif;
-  font-size: clamp(1.7rem, 4.8vw, 2.45rem);
+  font-size: clamp(2.6rem, 9vw, 4.4rem);
   font-weight: 700;
   letter-spacing: -0.03em;
   cursor: pointer;
@@ -168,17 +149,6 @@ h1 {
 
 .board.complete .tile {
   animation: glow 0.8s ease;
-}
-
-.status {
-  text-align: center;
-  margin-top: 18px;
-  min-height: 1.4em;
-}
-
-.status.done {
-  color: #4d7a48;
-  font-weight: 700;
 }
 
 @media (min-width: 680px) {
