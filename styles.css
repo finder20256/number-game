@@ -22,6 +22,8 @@ body {
   display: flex;
   align-items: safe center;
   justify-content: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
   font-family: "Segoe UI", "Trebuchet MS", "Gill Sans", sans-serif;
   color: var(--ink);
   background: var(--paper);
@@ -97,29 +99,24 @@ body {
     color 0.2s ease;
 }
 
-.tile:nth-child(5n + 1) {
-  --tile: #f0a888;
-  --tile-edge: #d88c6c;
+.tile:nth-child(4n + 1) {
+  --tile: #e24b4b;
+  --tile-edge: #c43a3a;
 }
 
-.tile:nth-child(5n + 2) {
+.tile:nth-child(4n + 2) {
   --tile: #8ecf9e;
   --tile-edge: #72b484;
 }
 
-.tile:nth-child(5n + 3) {
+.tile:nth-child(4n + 3) {
   --tile: #8ebce8;
   --tile-edge: #72a0d0;
 }
 
-.tile:nth-child(5n + 4) {
+.tile:nth-child(4n + 4) {
   --tile: #d4a8dc;
   --tile-edge: #bc8cc6;
-}
-
-.tile:nth-child(5n + 5) {
-  --tile: #f0d56e;
-  --tile-edge: #d4b84e;
 }
 
 .tile:hover {
@@ -159,6 +156,31 @@ body {
 
   .tile {
     border-radius: 32px;
+  }
+
+  .tile:nth-child(5n + 1) {
+    --tile: #e24b4b;
+    --tile-edge: #c43a3a;
+  }
+
+  .tile:nth-child(5n + 2) {
+    --tile: #8ecf9e;
+    --tile-edge: #72b484;
+  }
+
+  .tile:nth-child(5n + 3) {
+    --tile: #8ebce8;
+    --tile-edge: #72a0d0;
+  }
+
+  .tile:nth-child(5n + 4) {
+    --tile: #d4a8dc;
+    --tile-edge: #bc8cc6;
+  }
+
+  .tile:nth-child(5n + 5) {
+    --tile: #f0d56e;
+    --tile-edge: #d4b84e;
   }
 }
 
