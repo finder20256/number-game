@@ -1,3 +1,23 @@
+["gesturestart", "gesturechange", "gestureend"].forEach((eventName) => {
+  document.addEventListener(eventName, (event) => event.preventDefault());
+});
+
+document.addEventListener(
+  "touchmove",
+  (event) => {
+    if (event.touches.length > 1) event.preventDefault();
+  },
+  { passive: false },
+);
+
+document.addEventListener(
+  "wheel",
+  (event) => {
+    if (event.ctrlKey) event.preventDefault();
+  },
+  { passive: false },
+);
+
 const COLORS = [
   { name: "green", tile: "#5cb86a", edge: "#449954", ink: "#3d4a38" },
   { name: "blue", tile: "#5a9fd4", edge: "#3f86b8", ink: "#3d4a54" },
