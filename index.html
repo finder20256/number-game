@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Little Numbers</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="sky" aria-hidden="true">
+      <span class="blob blob-a"></span>
+      <span class="blob blob-b"></span>
+      <span class="blob blob-c"></span>
+    </div>
+
+    <main class="app">
+      <header class="header">
+        <p class="sun" aria-hidden="true">
+          <span class="sun-face"></span>
+        </p>
+        <h1>Little Numbers</h1>
+        <p class="hint" id="hint">Tap a button. The next number will peek out.</p>
+      </header>
+
+      <div class="board" id="board" role="group" aria-label="Number buttons"></div>
+
+      <p class="status" id="status" aria-live="polite">Next up is 1</p>
+    </main>
+
+    <script src="game.js"></script>
+  </body>
+</html>
