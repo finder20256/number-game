@@ -4,52 +4,57 @@ const board = document.getElementById("board");
 const hint = document.getElementById("hint");
 const status = document.getElementById("status");
 
-let nextNumber = 1;
+let found = 0;
 let resetting = false;
 let audioContext;
 
 const tiles = Array.from({ length: TOTAL }, (_, index) => {
   const button = document.createElement("button");
+  const number = index + 1;
   button.type = "button";
   button.className = "tile";
-  button.setAttribute("aria-label", `Blank button ${index + 1}`);
+  button.dataset.number = String(number);
+  button.setAttribute("aria-label", `Blank button ${number}`);
   button.addEventListener("click", () => onTileClick(button));
   board.appendChild(button);
   return button;
 });
 
+function wiggle(button) {
+  button.classList.remove("wiggle");
+  void button.offsetWidth;
+  button.classList.add("wiggle");
+}
+
 function onTileClick(button) {
   if (resetting) return;
 
   if (button.dataset.value) {
-    button.classList.remove("wiggle");
-    void button.offsetWidth;
-    button.classList.add("wiggle");
+    wiggle(button);
     return;
   }
 
-  const value = nextNumber;
-  nextNumber += 1;
-
+  const value = Number(button.dataset.number);
+  found += 1;
   button.dataset.value = String(value);
   button.textContent = String(value);
   button.classList.add("revealed");
   button.setAttribute("aria-label", `Number ${value}`);
   playTone(value);
 
-  if (value === TOTAL) {
+  if (found === TOTAL) {
     finish();
     return;
   }
 
-  hint.textContent = "Tap another blank button.";
-  status.textContent = `Next up is ${value + 1}`;
+  if (hint) hint.textContent = "Tap another blank button.";
+  status.textContent = `${found} of ${TOTAL} found`;
 }
 
 function finish() {
   resetting = true;
   board.classList.add("complete");
-  hint.textContent = "Every number came out to play.";
+  if (hint) hint.textContent = "well done";
   status.textContent = "All done!";
   status.classList.add("done");
   playSuccess();
@@ -67,9 +72,9 @@ function resetBoard() {
 
   board.classList.remove("complete");
   status.classList.remove("done");
-  nextNumber = 1;
-  hint.textContent = "Tap a button. The next number will peek out.";
-  status.textContent = "Next up is 1";
+  found = 0;
+  if (hint) hint.textContent = "Tap a button. The next number will peek out.";
+  status.textContent = `0 of ${TOTAL} found`;
   resetting = false;
 }
 
