@@ -27,7 +27,10 @@ const PAINT_COLORS = [
   { name: "red", tile: "#e24b4b", edge: "#c43a3a", ink: "#4a3535" },
   { name: "pink", tile: "#f2a0c4", edge: "#d484a8", ink: "#5a3d4a" },
   { name: "yellow", tile: "#f0d56e", edge: "#d4b84e", ink: "#5a5148" },
+  { name: "purple", tile: "#b07cc4", edge: "#9466a8", ink: "#4a3d50" },
 ];
+
+const GRAY = { name: "gray", tile: "#c8c4be", edge: "#ada9a3", ink: "#5a5148" };
 
 const app = document.querySelector(".app");
 const board = document.getElementById("board");
@@ -68,7 +71,6 @@ caseToggle.addEventListener("click", () => {
   });
 });
 
-const WHITE = PAINT_COLORS.find((color) => color.name === "white");
 
 function valuesForMode(selected) {
   if (selected === "abc") {
@@ -127,7 +129,7 @@ function buildBoard() {
     button.dataset.symbol = symbol;
     button.setAttribute("aria-label", `Blank button ${index + 1}`);
     button.addEventListener("click", () => onTileClick(button));
-    if (mode === "colors") paintTile(button, WHITE);
+    if (mode === "colors") paintTile(button, GRAY);
     board.appendChild(button);
     return button;
   });
@@ -194,7 +196,7 @@ function resetBoard() {
     delete button.dataset.value;
     button.setAttribute("aria-label", `Blank button ${index + 1}`);
     if (mode === "colors") {
-      paintTile(button, WHITE);
+      paintTile(button, GRAY);
     }
   });
 
