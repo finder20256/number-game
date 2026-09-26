@@ -34,6 +34,7 @@ const board = document.getElementById("board");
 const modeSelect = document.getElementById("mode");
 const colorsButton = document.getElementById("colors");
 const addButton = document.getElementById("addCircle");
+const circleCount = document.getElementById("circleCount");
 const caseToggle = document.getElementById("caseToggle");
 let drag = null;
 let circleSize = 88;
@@ -106,6 +107,8 @@ function buildBoard() {
   caseToggle.classList.toggle("hidden", mode !== "abc");
   colorsButton.classList.toggle("hidden", isCircles || mode === "colors");
   addButton.classList.toggle("hidden", !isCircles);
+  circleCount.classList.toggle("hidden", !isCircles);
+  updateCircleCount();
   updateCaseButton();
 
   if (isCircles) {
@@ -327,6 +330,13 @@ function randomSpot() {
 function addCircle(color, spot) {
   const circle = createCircle(color, true);
   moveCircle(circle, spot.x, spot.y);
+  updateCircleCount();
+}
+
+function updateCircleCount() {
+  const total = board.querySelectorAll(".circle").length;
+  circleCount.textContent = String(total);
+  circleCount.setAttribute("aria-label", `${total} ${total === 1 ? "circle" : "circles"}`);
 }
 
 window.addEventListener("resize", () => {

@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="icons/favicon-32.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-    <link rel="stylesheet" href="styles.css?v=11" />
+    <link rel="stylesheet" href="styles.css?v=12" />
   </head>
   <body>
     <div class="sky" aria-hidden="true">
@@ -39,12 +39,13 @@
       <div class="board" id="board" role="group" aria-label="1 to 20"></div>
 
       <div class="bottombar">
+        <p class="count hidden" id="circleCount" aria-live="polite">0</p>
         <button type="button" class="tool hidden" id="addCircle">Add</button>
         <button type="button" class="tool" id="colors">Colors</button>
         <button type="button" class="tool hidden" id="caseToggle" aria-pressed="true">ABC</button>
       </div>
     </main>
 
-    <script src="game.js?v=3"></script>
+    <script src="game.js?v=4"></script>
   </body>
 </html>
