@@ -19,6 +19,11 @@ body {
   overscroll-behavior: none;
 }
 
+body.circles,
+body.circles * {
+  touch-action: none;
+}
+
 body {
   min-height: 100dvh;
   display: flex;

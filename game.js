@@ -88,11 +88,13 @@ function formatSymbol(raw) {
 }
 
 function buildBoard() {
+  endDrag();
   resetting = false;
   found = 0;
   board.innerHTML = "";
   board.classList.remove("complete");
   const isCircles = mode === "circles";
+  document.body.classList.toggle("circles", isCircles);
   board.classList.toggle("letters", mode === "abc");
   board.classList.toggle("paint", mode === "colors");
   board.classList.toggle("playground", isCircles);
@@ -208,6 +210,8 @@ function preparePlayground() {
   });
 }
 
+let stack = 5;
+
 function createCircle(color, born) {
   const circle = document.createElement("button");
   circle.type = "button";
@@ -216,9 +220,6 @@ function createCircle(color, born) {
   circle.setAttribute("aria-label", `${color.name} circle`);
   paintTile(circle, color);
   circle.addEventListener("pointerdown", onPointerDown);
-  circle.addEventListener("pointermove", onPointerMove);
-  circle.addEventListener("pointerup", onPointerUp);
-  circle.addEventListener("pointercancel", onPointerUp);
   circle.addEventListener("dragstart", (event) => event.preventDefault());
   board.appendChild(circle);
   return circle;
@@ -227,39 +228,81 @@ function createCircle(color, born) {
 function onPointerDown(event) {
   if (event.button !== 0) return;
   const circle = event.currentTarget;
-  const parent = board.getBoundingClientRect();
   const rect = circle.getBoundingClientRect();
   drag = {
     circle,
     pointerId: event.pointerId,
+    pointerType: event.pointerType,
     offsetX: event.clientX - rect.left,
     offsetY: event.clientY - rect.top,
-    parentLeft: parent.left,
-    parentTop: parent.top,
   };
-  circle.setPointerCapture(event.pointerId);
   circle.classList.add("dragging");
   circle.classList.remove("born");
-  board.appendChild(circle);
+  stack += 1;
+  circle.style.zIndex = String(stack);
+  try {
+    board.setPointerCapture(event.pointerId);
+  } catch (error) {
+    // Touch browsers can reject capture; window listeners still follow the finger.
+  }
   event.preventDefault();
 }
 
 function onPointerMove(event) {
-  if (!drag || drag.pointerId !== event.pointerId) return;
-  const parent = board.getBoundingClientRect();
-  moveCircle(
-    drag.circle,
-    event.clientX - parent.left - drag.offsetX,
-    event.clientY - parent.top - drag.offsetY,
-  );
+  if (!drag || event.pointerId !== drag.pointerId) return;
+  followFinger(event.clientX, event.clientY);
   event.preventDefault();
 }
 
 function onPointerUp(event) {
-  if (!drag || drag.pointerId !== event.pointerId) return;
+  if (!drag || event.pointerId !== drag.pointerId) return;
+  if (event.type === "pointercancel" && drag.pointerType === "touch") return;
+  endDrag();
+}
+
+function followFinger(clientX, clientY) {
+  if (!drag) return;
+  const parent = board.getBoundingClientRect();
+  moveCircle(
+    drag.circle,
+    clientX - parent.left - drag.offsetX,
+    clientY - parent.top - drag.offsetY,
+  );
+}
+
+function endDrag() {
+  if (!drag) return;
   drag.circle.classList.remove("dragging");
   drag = null;
 }
+
+window.addEventListener("pointermove", onPointerMove, { passive: false });
+window.addEventListener("pointerup", onPointerUp);
+window.addEventListener("pointercancel", onPointerUp);
+
+document.addEventListener(
+  "touchmove",
+  (event) => {
+    if (!drag || drag.pointerType !== "touch") return;
+    event.preventDefault();
+    const touch = [...event.touches].find((item) => item.identifier === drag.pointerId);
+    if (!touch) return;
+    followFinger(touch.clientX, touch.clientY);
+  },
+  { passive: false },
+);
+
+document.addEventListener("touchend", (event) => {
+  if (!drag || drag.pointerType !== "touch") return;
+  const stillDown = [...event.touches].some((item) => item.identifier === drag.pointerId);
+  if (!stillDown) endDrag();
+});
+
+document.addEventListener("touchcancel", (event) => {
+  if (!drag || drag.pointerType !== "touch") return;
+  const stillDown = [...event.touches].some((item) => item.identifier === drag.pointerId);
+  if (!stillDown) endDrag();
+});
 
 function moveCircle(circle, x, y) {
   const maxX = Math.max(0, board.clientWidth - circle.offsetWidth);
