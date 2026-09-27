@@ -20,7 +20,15 @@ body {
 }
 
 body.circles,
-body.circles * {
+body.circles *,
+body.animations,
+body.animations *,
+body.animations2,
+body.animations2 * {
+  touch-action: none;
+}
+
+body.fireworks .night-sky {
   touch-action: none;
 }
 
@@ -207,13 +215,201 @@ body:has(.app.free) {
   font-size: clamp(1.8rem, 6.5vw, 3.2rem);
 }
 
-.board.playground {
+.board.playground,
+.board.stage {
   display: block;
   position: relative;
   flex: 1;
   min-height: 280px;
   touch-action: none;
   overflow: hidden;
+}
+
+body.animations {
+  background: #000;
+  color-scheme: dark;
+  --ink: #f2f2f2;
+  --ink-soft: #d0d0d0;
+  --paper: #000;
+}
+
+body.animations .sky,
+body.animations .bottombar {
+  display: none;
+}
+
+body.animations .mode,
+body.animations2 .mode,
+body.animations2 .tool,
+body.animations2 .count {
+  background-color: #1c1c1c;
+  color: #f4f4f4;
+  box-shadow:
+    0 4px 0 #111,
+    0 8px 16px rgba(0, 0, 0, 0.45);
+}
+
+body.animations2 {
+  background: #000;
+  color-scheme: dark;
+  --ink: #f2f2f2;
+  --ink-soft: #d0d0d0;
+  --paper: #000;
+}
+
+body.animations2 .sky {
+  display: none;
+}
+
+.board.reel {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  flex: 1;
+  background: #000;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.reel-gif {
+  max-width: min(100%, 760px);
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+body.fireworks {
+  background: #000;
+  color-scheme: dark;
+  --ink: #f2f2f2;
+  --ink-soft: #d0d0d0;
+  --paper: #000;
+}
+
+body.fireworks .sky,
+body.fireworks .bottombar {
+  display: none;
+}
+
+body.fireworks .mode {
+  background-color: #1c1c1c;
+  color: #f4f4f4;
+  box-shadow:
+    0 4px 0 #111,
+    0 8px 16px rgba(0, 0, 0, 0.45);
+}
+
+.board.night {
+  display: block;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.night-sky {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+.fire-panel {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  width: min(420px, calc(100% - 20px));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  padding: 10px 12px 8px;
+  border-radius: 16px;
+  background: rgba(28, 28, 28, 0.94);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.fire-panel.hidden {
+  display: none;
+}
+
+.fire-slider {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 8px;
+  margin: 0;
+  color: #e4e4e4;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.fire-slider input {
+  flex: 1 0 100%;
+  width: 100%;
+  margin: 0;
+  accent-color: #f3f3f3;
+  height: 18px;
+  touch-action: pan-x;
+}
+
+.fire-slider.is-off {
+  opacity: 0.38;
+}
+
+.fire-check {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 0;
+  color: #e4e4e4;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.fire-check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #f3f3f3;
+}
+
+.board.stage {
+  background: #000;
+  min-height: 0;
+}
+
+.ink {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.anim-hint {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.anim-hint[hidden] {
+  display: none;
 }
 
 .circle {

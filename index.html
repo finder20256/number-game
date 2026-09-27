@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="icons/favicon-32.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-    <link rel="stylesheet" href="styles.css?v=12" />
+    <link rel="stylesheet" href="styles.css?v=19" />
   </head>
   <body>
     <div class="sky" aria-hidden="true">
@@ -32,20 +32,51 @@
             <option value="abc">ABC</option>
             <option value="circles" selected>Circles</option>
             <option value="colors">Colors</option>
+            <option value="animations">Animations</option>
+            <option value="animations2">Animations 2</option>
+            <option value="fireworks">Fireworks</option>
           </select>
         </label>
       </div>
 
       <div class="board" id="board" role="group" aria-label="1 to 20"></div>
 
+      <div class="fire-panel hidden" id="firePanel">
+        <label class="fire-slider">Particles <span id="fireCountValue">90</span>
+          <input id="fireCount" type="range" min="20" max="200" value="90" />
+        </label>
+        <label class="fire-slider">Speed <span id="fireSpeedValue">180</span>
+          <input id="fireSpeed" type="range" min="40" max="420" value="180" />
+        </label>
+        <label class="fire-slider">Gravity <span id="fireGravityValue">320</span>
+          <input id="fireGravity" type="range" min="0" max="800" value="320" />
+        </label>
+        <label class="fire-slider">Life <span id="fireLifeValue">1.3</span>
+          <input id="fireLife" type="range" min="0.4" max="3" step="0.1" value="1.3" />
+        </label>
+        <label class="fire-slider">Size <span id="fireSizeValue">3</span>
+          <input id="fireSize" type="range" min="1" max="7" step="0.5" value="3" />
+        </label>
+        <label class="fire-slider" id="fireColor">Color <span id="fireHueValue">35</span>
+          <input id="fireHue" type="range" min="0" max="360" value="35" />
+        </label>
+        <label class="fire-check">
+          <input id="fireRainbow" type="checkbox" />
+          Rainbow
+        </label>
+      </div>
+
       <div class="bottombar">
         <p class="count hidden" id="circleCount" aria-live="polite">0</p>
         <button type="button" class="tool hidden" id="addCircle">Add</button>
+        <button type="button" class="tool hidden" id="gifBack">Back</button>
+        <p class="count hidden" id="gifCount" aria-live="polite">1 / 5</p>
+        <button type="button" class="tool hidden" id="gifNext">Next</button>
         <button type="button" class="tool" id="colors">Colors</button>
         <button type="button" class="tool hidden" id="caseToggle" aria-pressed="true">ABC</button>
       </div>
     </main>
 
-    <script src="game.js?v=4"></script>
+    <script src="game.js?v=15"></script>
   </body>
 </html>
