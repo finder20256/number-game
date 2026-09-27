@@ -47,9 +47,10 @@ const fireSpeed = document.getElementById("fireSpeed");
 const fireGravity = document.getElementById("fireGravity");
 const fireLife = document.getElementById("fireLife");
 const fireSize = document.getElementById("fireSize");
-const fireHue = document.getElementById("fireHue");
 const fireRainbow = document.getElementById("fireRainbow");
 const fireColor = document.getElementById("fireColor");
+let fireHueValue = 28;
+let fireSat = 92;
 const RAINBOW_HUES = [0, 24, 48, 72, 130, 175, 205, 265, 300];
 const caseToggle = document.getElementById("caseToggle");
 const GIFS = [
@@ -100,9 +101,18 @@ bindFireReadout(fireSpeed, "fireSpeedValue", (value) => value);
 bindFireReadout(fireGravity, "fireGravityValue", (value) => value);
 bindFireReadout(fireLife, "fireLifeValue", (value) => Number(value).toFixed(1));
 bindFireReadout(fireSize, "fireSizeValue", (value) => value);
-bindFireReadout(fireHue, "fireHueValue", (value) => value);
+fireColor.addEventListener("click", (event) => {
+  const swatch = event.target.closest(".swatch");
+  if (!swatch || fireRainbow.checked) return;
+  fireHueValue = Number(swatch.dataset.hue);
+  fireSat = Number(swatch.dataset.sat);
+  fireColor.querySelectorAll(".swatch").forEach((button) => {
+    const selected = button === swatch;
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+});
 fireRainbow.addEventListener("change", () => {
-  fireHue.disabled = fireRainbow.checked;
   fireColor.classList.toggle("is-off", fireRainbow.checked);
 });
 addButton.addEventListener("click", () => addCircle(randomPaint(), randomSpot()));
@@ -558,17 +568,26 @@ function launchFirework(x, y) {
     y: ground,
     tx: x,
     ty: Math.min(y, ground - 24),
-    hue: Number(fireHue.value),
+    hue: fireHueValue,
+    sat: fireSat,
   });
   ensureFireLoop();
 }
 
-function sparkHue(base) {
-  if (!fireRainbow.checked) return base + (Math.random() - 0.5) * 28;
-  return RAINBOW_HUES[Math.floor(Math.random() * RAINBOW_HUES.length)];
+function sparkColor(baseHue, baseSat) {
+  if (fireRainbow.checked) {
+    return {
+      hue: RAINBOW_HUES[Math.floor(Math.random() * RAINBOW_HUES.length)],
+      sat: 92,
+    };
+  }
+  return {
+    hue: baseSat === 0 ? baseHue : baseHue + (Math.random() - 0.5) * 16,
+    sat: baseSat,
+  };
 }
 
-function burstFirework(x, y, hue) {
+function burstFirework(x, y, hue, sat) {
   const count = Number(fireCount.value);
   const speed = Number(fireSpeed.value);
   const life = Number(fireLife.value);
@@ -583,7 +602,7 @@ function burstFirework(x, y, hue) {
       vy: Math.sin(angle) * mag,
       life,
       max: life,
-      hue: sparkHue(hue),
+      ...sparkColor(hue, sat),
       size: size * (0.55 + Math.random() * 0.7),
     });
   }
@@ -613,7 +632,7 @@ function tickFireworks(now) {
     const dy = rocket.ty - rocket.y;
     const distance = Math.hypot(dx, dy);
     if (distance < 12) {
-      burstFirework(rocket.tx, rocket.ty, rocket.hue);
+      burstFirework(rocket.tx, rocket.ty, rocket.hue, rocket.sat);
       fireRockets.splice(index, 1);
       continue;
     }
@@ -627,7 +646,7 @@ function tickFireworks(now) {
       vy: 40 + Math.random() * 50,
       life: 0.32,
       max: 0.32,
-      hue: sparkHue(rocket.hue),
+      ...sparkColor(rocket.hue, rocket.sat),
       size: 2,
     });
   }
@@ -656,13 +675,15 @@ function paintFireworks() {
   fireParticles.forEach((particle) => {
     const alpha = Math.max(0, particle.life / particle.max);
     fireCtx.beginPath();
-    fireCtx.fillStyle = `hsla(${particle.hue}, 92%, 68%, ${alpha})`;
+    const light = particle.sat === 0 ? 96 : 68;
+    fireCtx.fillStyle = `hsla(${particle.hue}, ${particle.sat}%, ${light}%, ${alpha})`;
     fireCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
     fireCtx.fill();
   });
   fireRockets.forEach((rocket) => {
     fireCtx.beginPath();
-    fireCtx.fillStyle = `hsl(${rocket.hue}, 95%, 78%)`;
+    const light = rocket.sat === 0 ? 96 : 78;
+    fireCtx.fillStyle = `hsl(${rocket.hue}, ${rocket.sat}%, ${light}%)`;
     fireCtx.arc(rocket.x, rocket.y, 3, 0, Math.PI * 2);
     fireCtx.fill();
   });

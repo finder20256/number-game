@@ -359,8 +359,32 @@ body.fireworks .mode {
   touch-action: pan-x;
 }
 
-.fire-slider.is-off {
+.fire-colors.is-off {
   opacity: 0.38;
+  pointer-events: none;
+}
+
+.fire-colors {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 0;
+}
+
+.swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+
+.swatch.is-selected {
+  box-shadow: 0 0 0 2px #fff;
 }
 
 .fire-check {

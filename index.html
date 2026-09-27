@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="icons/favicon-32.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-    <link rel="stylesheet" href="styles.css?v=19" />
+    <link rel="stylesheet" href="styles.css?v=20" />
   </head>
   <body>
     <div class="sky" aria-hidden="true">
@@ -57,9 +57,16 @@
         <label class="fire-slider">Size <span id="fireSizeValue">3</span>
           <input id="fireSize" type="range" min="1" max="7" step="0.5" value="3" />
         </label>
-        <label class="fire-slider" id="fireColor">Color <span id="fireHueValue">35</span>
-          <input id="fireHue" type="range" min="0" max="360" value="35" />
-        </label>
+        <div class="fire-colors" id="fireColor" role="group" aria-label="Color">
+          <button type="button" class="swatch" data-hue="0" data-sat="92" style="--swatch:#e24b4b" aria-label="Red" aria-pressed="false"></button>
+          <button type="button" class="swatch is-selected" data-hue="28" data-sat="92" style="--swatch:#f0a05a" aria-label="Orange" aria-pressed="true"></button>
+          <button type="button" class="swatch" data-hue="48" data-sat="92" style="--swatch:#f0d56e" aria-label="Yellow" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-hue="130" data-sat="92" style="--swatch:#8ecf9e" aria-label="Green" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-hue="205" data-sat="92" style="--swatch:#8ebce8" aria-label="Blue" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-hue="280" data-sat="92" style="--swatch:#b07cc4" aria-label="Purple" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-hue="330" data-sat="92" style="--swatch:#f2a0c4" aria-label="Pink" aria-pressed="false"></button>
+          <button type="button" class="swatch" data-hue="0" data-sat="0" style="--swatch:#f7f4ef" aria-label="White" aria-pressed="false"></button>
+        </div>
         <label class="fire-check">
           <input id="fireRainbow" type="checkbox" />
           Rainbow
@@ -77,6 +84,6 @@
       </div>
     </main>
 
-    <script src="game.js?v=15"></script>
+    <script src="game.js?v=16"></script>
   </body>
 </html>
