@@ -1,4 +1,4 @@
-["gesturestart", "gesturechange", "gestureend"].forEach((eventName) => {
+["gesturestart", "gesturechange", "gestureend", "selectstart", "contextmenu"].forEach((eventName) => {
   document.addEventListener(eventName, (event) => event.preventDefault());
 });
 
@@ -53,6 +53,9 @@ let fireHueValue = 28;
 let fireSat = 92;
 const RAINBOW_HUES = [0, 24, 48, 72, 130, 175, 205, 265, 300];
 const caseToggle = document.getElementById("caseToggle");
+const shapeAsk = document.getElementById("shapeAsk");
+const SHAPE_KINDS = ["circle", "square", "triangle", "star"];
+let shapeTarget = "circle";
 const GIFS = [
   "animations/1.gif",
   "animations/2.gif",
@@ -85,6 +88,7 @@ let fireRockets = [];
 let fireFrame = 0;
 let fireRunning = false;
 let fireLast = 0;
+let fireHold = null;
 
 buildBoard();
 
@@ -160,6 +164,7 @@ function buildBoard() {
   const isAnimations = mode === "animations";
   const isReel = mode === "animations2";
   const isFire = mode === "fireworks";
+  const isShapes = mode === "shapes";
   document.body.classList.toggle("circles", isCircles);
   document.body.classList.toggle("animations", isAnimations);
   document.body.classList.toggle("animations2", isReel);
@@ -171,6 +176,8 @@ function buildBoard() {
   board.classList.toggle("stage", isAnimations);
   board.classList.toggle("reel", isReel);
   board.classList.toggle("night", isFire);
+  board.classList.toggle("shapes", isShapes);
+  shapeAsk.classList.toggle("hidden", !isShapes);
   app.classList.toggle("free", isCircles || isAnimations || isReel || isFire);
   firePanel.classList.toggle("hidden", !isFire);
   board.setAttribute(
@@ -185,12 +192,14 @@ function buildBoard() {
             ? "Animations 2"
             : isFire
               ? "Fireworks"
+              : isShapes
+                ? "Shapes"
               : mode === "colors"
             ? "Colors"
             : `Count by ${mode}`,
   );
   caseToggle.classList.toggle("hidden", mode !== "abc");
-  colorsButton.classList.toggle("hidden", isCircles || mode === "colors" || isAnimations || isReel || isFire);
+  colorsButton.classList.toggle("hidden", isCircles || mode === "colors" || isAnimations || isReel || isFire || isShapes);
   addButton.classList.toggle("hidden", !isCircles);
   circleCount.classList.toggle("hidden", !isCircles);
   gifBack.classList.toggle("hidden", !isReel);
@@ -223,6 +232,11 @@ function buildBoard() {
     return;
   }
 
+  if (isShapes) {
+    buildShapes();
+    return;
+  }
+
   const values = valuesForMode(mode);
   tiles = values.map((raw, index) => {
     const button = document.createElement("button");
@@ -237,6 +251,54 @@ function buildBoard() {
     board.appendChild(button);
     return button;
   });
+}
+
+const SHAPE_SVG = {
+  circle: '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42"/></svg>',
+  square: '<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="14" y="14" width="72" height="72" rx="12"/></svg>',
+  triangle: '<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,6 96,94 4,94"/></svg>',
+  star: '<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,4 62,36 96,36 68,57 79,92 50,72 21,92 32,57 4,36 38,36"/></svg>',
+};
+
+function buildShapes() {
+  shapeTarget = SHAPE_KINDS[Math.floor(Math.random() * SHAPE_KINDS.length)];
+  shapeAsk.dataset.shape = shapeTarget;
+  shapeAsk.innerHTML = SHAPE_SVG[shapeTarget];
+  const bag = SHAPE_KINDS.flatMap((shape) => Array(5).fill(shape));
+  for (let index = bag.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [bag[index], bag[swap]] = [bag[swap], bag[index]];
+  }
+
+  tiles = bag.map((shape) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tile shape-tile";
+    button.dataset.shape = shape;
+    button.setAttribute("aria-label", shape);
+    button.innerHTML = SHAPE_SVG[shape];
+    button.addEventListener("click", () => onShapeClick(button));
+    board.appendChild(button);
+    return button;
+  });
+}
+
+function onShapeClick(button) {
+  if (resetting) return;
+  if (button.dataset.shape !== shapeTarget) {
+    wiggle(button);
+    return;
+  }
+  if (button.classList.contains("matched")) return;
+
+  button.classList.add("matched");
+  playTone(tiles.filter((tile) => tile.classList.contains("matched")).length);
+  const remaining = tiles.some(
+    (tile) => tile.dataset.shape === shapeTarget && !tile.classList.contains("matched"),
+  );
+  if (!remaining) {
+    finish();
+  }
 }
 
 function updateCaseButton() {
@@ -294,6 +356,15 @@ function finish() {
 }
 
 function resetBoard() {
+  if (mode === "shapes") {
+    board.innerHTML = "";
+    board.classList.remove("complete");
+    found = 0;
+    resetting = false;
+    buildShapes();
+    return;
+  }
+
   tiles.forEach((button, index) => {
     button.textContent = "";
     button.classList.remove("revealed", "wiggle");
@@ -520,7 +591,14 @@ function bindFireReadout(input, outputId, format) {
   paint();
 }
 
+function stopFireHold() {
+  if (!fireHold) return;
+  clearInterval(fireHold.timer);
+  fireHold = null;
+}
+
 function stopFireworks() {
+  stopFireHold();
   fireRunning = false;
   cancelAnimationFrame(fireFrame);
   fireParticles = [];
@@ -539,6 +617,9 @@ function startFireworks() {
   fireCtx = fireCanvas.getContext("2d");
   board.appendChild(fireCanvas);
   fireCanvas.addEventListener("pointerdown", onFirePointer);
+  fireCanvas.addEventListener("pointermove", onFireMove);
+  fireCanvas.addEventListener("pointerup", onFireRelease);
+  fireCanvas.addEventListener("pointercancel", onFireRelease);
   window.addEventListener("resize", resizeFireworks);
   requestAnimationFrame(resizeFireworks);
 }
@@ -554,10 +635,46 @@ function resizeFireworks() {
   paintFireworks();
 }
 
-function onFirePointer(event) {
-  if (event.button !== 0) return;
+function firePoint(event) {
   const rect = fireCanvas.getBoundingClientRect();
-  launchFirework(event.clientX - rect.left, event.clientY - rect.top);
+  return {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top,
+  };
+}
+
+function onFirePointer(event) {
+  if (event.button !== 0 || !fireCanvas) return;
+  event.preventDefault();
+  try {
+    fireCanvas.setPointerCapture(event.pointerId);
+  } catch {
+    // Some browsers reject capture on this event. Holding still repeats from the pointer.
+  }
+  const point = firePoint(event);
+  launchFirework(point.x, point.y);
+  stopFireHold();
+  fireHold = {
+    pointerId: event.pointerId,
+    x: point.x,
+    y: point.y,
+    timer: window.setInterval(() => {
+      if (!fireHold) return;
+      launchFirework(fireHold.x, fireHold.y);
+    }, 50),
+  };
+}
+
+function onFireMove(event) {
+  if (!fireHold || event.pointerId !== fireHold.pointerId) return;
+  const point = firePoint(event);
+  fireHold.x = point.x;
+  fireHold.y = point.y;
+}
+
+function onFireRelease(event) {
+  if (!fireHold || event.pointerId !== fireHold.pointerId) return;
+  stopFireHold();
 }
 
 function launchFirework(x, y) {
