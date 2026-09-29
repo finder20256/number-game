@@ -384,13 +384,15 @@ body.fireworks .mode {
 }
 
 .board.shapes .shape-tile[data-shape="triangle"] svg,
-.board.shapes .shape-tile[data-shape="star"] svg {
+.board.shapes .shape-tile[data-shape="star"] svg,
+.board.shapes .shape-tile[data-shape="oval"] svg,
+.board.shapes .shape-tile[data-shape="heart"] svg {
   width: 76%;
   height: 76%;
 }
 
 .board.shapes .shape-tile.matched {
-  color: #3fa85a;
+  color: var(--shape-color, #3fa85a);
 }
 
 .fire-slider {

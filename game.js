@@ -54,8 +54,7 @@ let fireSat = 92;
 const RAINBOW_HUES = [0, 24, 48, 72, 130, 175, 205, 265, 300];
 const caseToggle = document.getElementById("caseToggle");
 const shapeAsk = document.getElementById("shapeAsk");
-const SHAPE_KINDS = ["circle", "square", "triangle", "star"];
-let shapeTarget = "circle";
+const SHAPE_KINDS = ["circle", "square", "triangle", "star", "oval", "heart"];
 const GIFS = [
   "animations/1.gif",
   "animations/2.gif",
@@ -177,7 +176,7 @@ function buildBoard() {
   board.classList.toggle("reel", isReel);
   board.classList.toggle("night", isFire);
   board.classList.toggle("shapes", isShapes);
-  shapeAsk.classList.toggle("hidden", !isShapes);
+  shapeAsk.classList.add("hidden");
   app.classList.toggle("free", isCircles || isAnimations || isReel || isFire);
   firePanel.classList.toggle("hidden", !isFire);
   board.setAttribute(
@@ -258,17 +257,19 @@ const SHAPE_SVG = {
   square: '<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="14" y="14" width="72" height="72" rx="12"/></svg>',
   triangle: '<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,6 96,94 4,94"/></svg>',
   star: '<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,4 62,36 96,36 68,57 79,92 50,72 21,92 32,57 4,36 38,36"/></svg>',
+  oval: '<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="50" rx="46" ry="30"/></svg>',
+  heart: '<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 86C22 64 8 48 8 32 8 18 20 8 33 8c8 0 14 4 17 11 3-7 9-11 17-11 13 0 25 10 25 24 0 16-14 32-42 54z"/></svg>',
 };
 
+const SHAPE_TAP_COLORS = PAINT_COLORS.filter((color) => color.name !== "white");
+
 function buildShapes() {
-  shapeTarget = SHAPE_KINDS[Math.floor(Math.random() * SHAPE_KINDS.length)];
-  shapeAsk.dataset.shape = shapeTarget;
-  shapeAsk.innerHTML = SHAPE_SVG[shapeTarget];
-  const bag = SHAPE_KINDS.flatMap((shape) => Array(5).fill(shape));
+  const bag = SHAPE_KINDS.flatMap((shape) => Array(4).fill(shape));
   for (let index = bag.length - 1; index > 0; index -= 1) {
     const swap = Math.floor(Math.random() * (index + 1));
     [bag[index], bag[swap]] = [bag[swap], bag[index]];
   }
+  bag.length = 20;
 
   tiles = bag.map((shape) => {
     const button = document.createElement("button");
@@ -284,19 +285,18 @@ function buildShapes() {
 }
 
 function onShapeClick(button) {
-  if (resetting) return;
-  if (button.dataset.shape !== shapeTarget) {
-    wiggle(button);
-    return;
-  }
-  if (button.classList.contains("matched")) return;
+  if (resetting || button.classList.contains("matched")) return;
 
   button.classList.add("matched");
-  playTone(tiles.filter((tile) => tile.classList.contains("matched")).length);
-  const remaining = tiles.some(
-    (tile) => tile.dataset.shape === shapeTarget && !tile.classList.contains("matched"),
+  const used = new Set(
+    tiles.filter((tile) => tile.classList.contains("matched")).map((tile) => tile.style.getPropertyValue("--shape-color")),
   );
-  if (!remaining) {
+  let choices = SHAPE_TAP_COLORS.filter((color) => !used.has(color.tile));
+  if (!choices.length) choices = SHAPE_TAP_COLORS;
+  const color = choices[Math.floor(Math.random() * choices.length)];
+  button.style.setProperty("--shape-color", color.tile);
+  playTone(tiles.filter((tile) => tile.classList.contains("matched")).length);
+  if (tiles.every((tile) => tile.classList.contains("matched"))) {
     finish();
   }
 }
