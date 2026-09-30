@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="icons/favicon-32.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
-    <link rel="stylesheet" href="styles.css?v=27" />
+    <link rel="stylesheet" href="styles.css?v=29" />
   </head>
   <body>
     <div class="sky" aria-hidden="true">
@@ -33,6 +33,8 @@
             <option value="circles" selected>Circles</option>
             <option value="colors">Colors</option>
             <option value="shapes">Shapes</option>
+            <option value="draw">Draw</option>
+            <option value="down">20-0</option>
             <option value="animations">Animations</option>
             <option value="animations2">Animations 2</option>
             <option value="fireworks">Fireworks</option>
@@ -75,6 +77,8 @@
         </label>
       </div>
 
+      <div class="pencil-tray hidden" id="pencilTray" role="group" aria-label="Pencils"></div>
+
       <div class="bottombar">
         <p class="count hidden" id="circleCount" aria-live="polite">0</p>
         <button type="button" class="tool hidden" id="addCircle">Add</button>
@@ -86,6 +90,6 @@
       </div>
     </main>
 
-    <script src="game.js?v=26"></script>
+    <script src="game.js?v=28"></script>
   </body>
 </html>

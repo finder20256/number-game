@@ -54,7 +54,24 @@ let fireSat = 92;
 const RAINBOW_HUES = [0, 24, 48, 72, 130, 175, 205, 265, 300];
 const caseToggle = document.getElementById("caseToggle");
 const shapeAsk = document.getElementById("shapeAsk");
-const SHAPE_KINDS = ["circle", "square", "triangle", "star", "oval", "heart"];
+const pencilTray = document.getElementById("pencilTray");
+const PENCILS = [
+  { name: "red", color: "#e24b4b" },
+  { name: "orange", color: "#f0a05a" },
+  { name: "yellow", color: "#f0d56e" },
+  { name: "green", color: "#5cb86a" },
+  { name: "blue", color: "#5a9fd4" },
+  { name: "purple", color: "#b07cc4" },
+  { name: "pink", color: "#f2a0c4" },
+  { name: "black", color: "#3a3532" },
+];
+let drawCanvas = null;
+let drawCtx = null;
+let drawColor = PENCILS[0].color;
+let drawStroke = null;
+let countdownValue = 20;
+let countdownColor = "";
+const SHAPE_KINDS = ["circle", "square", "triangle", "star", "oval", "heart", "rectangle", "rhombus"];
 const GIFS = [
   "animations/1.gif",
   "animations/2.gif",
@@ -155,6 +172,7 @@ function buildBoard() {
   endDrag();
   stopAnimations();
   stopFireworks();
+  stopDraw();
   resetting = false;
   found = 0;
   board.innerHTML = "";
@@ -164,10 +182,13 @@ function buildBoard() {
   const isReel = mode === "animations2";
   const isFire = mode === "fireworks";
   const isShapes = mode === "shapes";
+  const isDraw = mode === "draw";
+  const isDown = mode === "down";
   document.body.classList.toggle("circles", isCircles);
   document.body.classList.toggle("animations", isAnimations);
   document.body.classList.toggle("animations2", isReel);
   document.body.classList.toggle("fireworks", isFire);
+  document.body.classList.toggle("draw", isDraw);
   document.querySelector('meta[name="theme-color"]').setAttribute("content", isAnimations || isReel || isFire ? "#000000" : "#f3eee6");
   board.classList.toggle("letters", mode === "abc");
   board.classList.toggle("paint", mode === "colors");
@@ -176,8 +197,10 @@ function buildBoard() {
   board.classList.toggle("reel", isReel);
   board.classList.toggle("night", isFire);
   board.classList.toggle("shapes", isShapes);
+  board.classList.toggle("sketchpad", isDraw);
+  board.classList.toggle("countdown", isDown);
   shapeAsk.classList.add("hidden");
-  app.classList.toggle("free", isCircles || isAnimations || isReel || isFire);
+  app.classList.toggle("free", isCircles || isAnimations || isReel || isFire || isDraw);
   firePanel.classList.toggle("hidden", !isFire);
   board.setAttribute(
     "aria-label",
@@ -193,12 +216,16 @@ function buildBoard() {
               ? "Fireworks"
               : isShapes
                 ? "Shapes"
+                : isDraw
+                  ? "Draw"
+                  : isDown
+                    ? "Countdown"
               : mode === "colors"
             ? "Colors"
             : `Count by ${mode}`,
   );
   caseToggle.classList.toggle("hidden", mode !== "abc");
-  colorsButton.classList.toggle("hidden", isCircles || mode === "colors" || isAnimations || isReel || isFire || isShapes);
+  colorsButton.classList.toggle("hidden", isCircles || mode === "colors" || isAnimations || isReel || isFire || isShapes || isDraw || isDown);
   addButton.classList.toggle("hidden", !isCircles);
   circleCount.classList.toggle("hidden", !isCircles);
   gifBack.classList.toggle("hidden", !isReel);
@@ -236,6 +263,18 @@ function buildBoard() {
     return;
   }
 
+  if (isDraw) {
+    tiles = [];
+    startDraw();
+    return;
+  }
+
+  if (isDown) {
+    tiles = [];
+    buildCountdown();
+    return;
+  }
+
   const values = valuesForMode(mode);
   tiles = values.map((raw, index) => {
     const button = document.createElement("button");
@@ -259,12 +298,17 @@ const SHAPE_SVG = {
   star: '<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,4 62,36 96,36 68,57 79,92 50,72 21,92 32,57 4,36 38,36"/></svg>',
   oval: '<svg viewBox="0 0 100 100" aria-hidden="true"><ellipse cx="50" cy="50" rx="46" ry="30"/></svg>',
   heart: '<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 86C22 64 8 48 8 32 8 18 20 8 33 8c8 0 14 4 17 11 3-7 9-11 17-11 13 0 25 10 25 24 0 16-14 32-42 54z"/></svg>',
+  rectangle: '<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="6" y="28" width="88" height="44" rx="8"/></svg>',
+  rhombus: '<svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="28,18 94,18 72,82 6,82"/></svg>',
 };
 
 const SHAPE_TAP_COLORS = PAINT_COLORS.filter((color) => color.name !== "white");
 
 function buildShapes() {
-  const bag = SHAPE_KINDS.flatMap((shape) => Array(4).fill(shape));
+  const bag = SHAPE_KINDS.flatMap((shape) => [shape, shape]);
+  while (bag.length < 20) {
+    bag.push(SHAPE_KINDS[Math.floor(Math.random() * SHAPE_KINDS.length)]);
+  }
   for (let index = bag.length - 1; index > 0; index -= 1) {
     const swap = Math.floor(Math.random() * (index + 1));
     [bag[index], bag[swap]] = [bag[swap], bag[index]];
@@ -282,6 +326,135 @@ function buildShapes() {
     board.appendChild(button);
     return button;
   });
+}
+
+function buildCountdown() {
+  countdownValue = 20;
+  countdownColor = "";
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "count-down";
+  paintCountdown(button, false);
+  button.addEventListener("click", () => {
+    countdownValue -= 1;
+    if (countdownValue < 0) countdownValue = 20;
+    paintCountdown(button, true);
+    playTone(countdownValue === 20 ? 1 : 21 - countdownValue);
+  });
+  board.appendChild(button);
+}
+
+function paintCountdown(button, changeColor) {
+  if (changeColor || !countdownColor) {
+    const choices = SHAPE_TAP_COLORS.filter((color) => color.tile !== countdownColor);
+    const color = choices[Math.floor(Math.random() * choices.length)];
+    countdownColor = color.tile;
+    button.style.background = color.tile;
+    button.style.color = color.ink;
+    button.style.boxShadow = `0 10px 0 ${color.edge}, 0 14px 18px rgba(92, 78, 62, 0.12)`;
+  }
+  button.textContent = String(countdownValue);
+  button.setAttribute("aria-label", String(countdownValue));
+}
+
+function stopDraw() {
+  drawStroke = null;
+  if (pencilTray) pencilTray.classList.add("hidden");
+  window.removeEventListener("resize", resizeDraw);
+  drawCanvas = null;
+  drawCtx = null;
+}
+
+function startDraw() {
+  if (!pencilTray.childElementCount) buildPencils();
+  pencilTray.classList.remove("hidden");
+  drawCanvas = document.createElement("canvas");
+  drawCanvas.className = "sketch";
+  drawCanvas.setAttribute("aria-label", "Drawing page");
+  board.appendChild(drawCanvas);
+  drawCtx = drawCanvas.getContext("2d");
+  window.addEventListener("resize", resizeDraw);
+  requestAnimationFrame(resizeDraw);
+  drawCanvas.addEventListener("pointerdown", onDrawDown);
+  drawCanvas.addEventListener("pointermove", onDrawMove);
+  drawCanvas.addEventListener("pointerup", onDrawUp);
+  drawCanvas.addEventListener("pointercancel", onDrawUp);
+}
+
+function resizeDraw() {
+  if (!drawCanvas || !drawCtx) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.max(1, drawCanvas.clientWidth);
+  const height = Math.max(1, drawCanvas.clientHeight);
+  drawCanvas.width = Math.floor(width * dpr);
+  drawCanvas.height = Math.floor(height * dpr);
+  drawCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  drawCtx.lineCap = "round";
+  drawCtx.lineJoin = "round";
+}
+
+function buildPencils() {
+  PENCILS.forEach((pencil, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "pencil" + (index === 0 ? " is-selected" : "");
+    button.style.setProperty("--lead", pencil.color);
+    button.setAttribute("aria-label", `${pencil.name} pencil`);
+    button.setAttribute("aria-pressed", String(index === 0));
+    button.innerHTML =
+      '<span class="pencil-body"></span><span class="pencil-wood"></span><span class="pencil-tip"></span>';
+    button.addEventListener("click", () => {
+      drawColor = pencil.color;
+      pencilTray.querySelectorAll(".pencil").forEach((item) => {
+        const selected = item === button;
+        item.classList.toggle("is-selected", selected);
+        item.setAttribute("aria-pressed", String(selected));
+      });
+    });
+    pencilTray.appendChild(button);
+  });
+}
+
+function drawPoint(event) {
+  const rect = drawCanvas.getBoundingClientRect();
+  return {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top,
+  };
+}
+
+function onDrawDown(event) {
+  if (event.button !== 0 || !drawCanvas) return;
+  event.preventDefault();
+  try {
+    drawCanvas.setPointerCapture(event.pointerId);
+  } catch {
+    // Capture can fail for some pointer events. Drawing still follows the pointer.
+  }
+  const point = drawPoint(event);
+  drawStroke = { id: event.pointerId, x: point.x, y: point.y };
+  drawCtx.fillStyle = drawColor;
+  drawCtx.beginPath();
+  drawCtx.arc(point.x, point.y, 7, 0, Math.PI * 2);
+  drawCtx.fill();
+}
+
+function onDrawMove(event) {
+  if (!drawStroke || event.pointerId !== drawStroke.id || !drawCtx) return;
+  const next = drawPoint(event);
+  drawCtx.strokeStyle = drawColor;
+  drawCtx.lineWidth = 14;
+  drawCtx.beginPath();
+  drawCtx.moveTo(drawStroke.x, drawStroke.y);
+  drawCtx.lineTo(next.x, next.y);
+  drawCtx.stroke();
+  drawStroke.x = next.x;
+  drawStroke.y = next.y;
+}
+
+function onDrawUp(event) {
+  if (!drawStroke || event.pointerId !== drawStroke.id) return;
+  drawStroke = null;
 }
 
 function onShapeClick(button) {
